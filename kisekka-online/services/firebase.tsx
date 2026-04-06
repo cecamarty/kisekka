@@ -15,7 +15,8 @@
  */
 
 import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
-import { getAuth, Auth } from 'firebase/auth';
+import { initializeAuth, getAuth, getReactNativePersistence, Auth } from 'firebase/auth';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getFirestore, Firestore } from 'firebase/firestore';
 
 const firebaseConfig = {
@@ -31,7 +32,11 @@ const firebaseConfig = {
 const app: FirebaseApp =
   getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
 
-const auth: Auth = getAuth(app);
+// Use AsyncStorage for persistence — the web default (indexedDB) doesn't
+// exist in React Native, so without this auth is memory-only and clears on reload.
+const auth: Auth = getApps().length === 1
+  ? initializeAuth(app, { persistence: getReactNativePersistence(AsyncStorage) })
+  : getAuth(app);
 const db: Firestore = getFirestore(app);
 
 export { app, auth, db, firebaseConfig };

@@ -41,6 +41,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      // Keep spinner visible while we resolve the full user state.
+      // Without this, there's a window where user !== null but userProfile
+      // is still null (async fetch in flight), causing the onboarding screen
+      // to flash for returning users.
+      setLoading(true);
       setUser(firebaseUser);
 
       if (firebaseUser) {

@@ -56,8 +56,8 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white,
   },
   topBar: {
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.xl,
+    paddingVertical: Spacing.base,
     borderBottomWidth: 1,
     borderBottomColor: Colors.border,
   },
@@ -67,7 +67,7 @@ const styles = StyleSheet.create({
   },
   body: {
     flex: 1,
-    paddingHorizontal: Spacing.lg,
+    paddingHorizontal: Spacing.xl,
     justifyContent: 'center',
     gap: Spacing.sm,
   },
@@ -85,10 +85,10 @@ const styles = StyleSheet.create({
   },
   hint: {
     ...Typography.caption,
-    marginTop: Spacing.md,
+    marginTop: Spacing.base,
     color: Colors.textMuted,
   },
   signOutButton: {
-    marginTop: Spacing.xl,
+    marginTop: Spacing.xxl,
   },
 });

@@ -11,6 +11,7 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
+  Pressable,
 } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
@@ -30,10 +31,10 @@ const RESEND_TIMEOUT = 60; // seconds
 export default function OTPVerificationScreen({ navigation, route }: Props) {
   const { phoneNumber } = route.params;
 
-  const [digits, setDigits] = useState<string[]>(Array(OTP_LENGTH).fill(''));
+  const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [countdown, setCountdown] = useState(RESEND_TIMEOUT);
-  const inputs = useRef<(TextInput | null)[]>([]);
+  const hiddenInput = useRef<TextInput | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Countdown timer for resend
@@ -50,48 +51,29 @@ export default function OTPVerificationScreen({ navigation, route }: Props) {
     return () => clearInterval(timerRef.current!);
   }, []);
 
-  const handleDigitChange = (text: string, index: number) => {
-    // Accept only single digit
-    const digit = text.replace(/\D/g, '').slice(-1);
-    const newDigits = [...digits];
-    newDigits[index] = digit;
-    setDigits(newDigits);
-
-    // Auto-advance
-    if (digit && index < OTP_LENGTH - 1) {
-      inputs.current[index + 1]?.focus();
-    }
-
-    // Auto-submit when all filled
-    if (digit && index === OTP_LENGTH - 1) {
-      const code = newDigits.join('');
-      if (code.length === OTP_LENGTH) {
-        handleVerify(code);
-      }
+  const handleCodeChange = (text: string) => {
+    const sanitized = text.replace(/\D/g, '').slice(0, OTP_LENGTH);
+    setCode(sanitized);
+    if (sanitized.length === OTP_LENGTH) {
+      handleVerify(sanitized);
     }
   };
 
-  const handleKeyPress = (key: string, index: number) => {
-    if (key === 'Backspace' && !digits[index] && index > 0) {
-      inputs.current[index - 1]?.focus();
-    }
-  };
-
-  const handleVerify = async (code?: string) => {
-    const otpCode = code ?? digits.join('');
-    if (otpCode.length !== OTP_LENGTH) {
+  const handleVerify = async (otpCode?: string) => {
+    const finalCode = otpCode ?? code;
+    if (finalCode.length !== OTP_LENGTH) {
       Alert.alert('Enter code', 'Please enter the full 6-digit code.');
       return;
     }
 
     setLoading(true);
     try {
-      await confirmPhoneOTP(otpCode);
+      await confirmPhoneOTP(finalCode);
       // Auth state change triggers navigation automatically via useAuth
     } catch (error: any) {
       Alert.alert('Wrong code', 'The code you entered is incorrect. Please try again.');
-      setDigits(Array(OTP_LENGTH).fill(''));
-      inputs.current[0]?.focus();
+      setCode('');
+      hiddenInput.current?.focus();
     } finally {
       setLoading(false);
     }
@@ -121,29 +103,38 @@ export default function OTPVerificationScreen({ navigation, route }: Props) {
             </Text>
           </View>
 
-          {/* OTP boxes */}
-          <View style={styles.otpRow}>
-            {digits.map((digit, i) => (
-              <TextInput
-                key={i}
-                ref={(ref) => { inputs.current[i] = ref; }}
-                style={[
-                  styles.otpBox,
-                  digit ? styles.otpBoxFilled : null,
-                  loading ? styles.otpBoxDisabled : null,
-                ]}
-                value={digit}
-                onChangeText={(text) => handleDigitChange(text, i)}
-                onKeyPress={({ nativeEvent }) => handleKeyPress(nativeEvent.key, i)}
-                keyboardType="number-pad"
-                maxLength={1}
-                autoFocus={i === 0}
-                editable={!loading}
-                textAlign="center"
-                selectionColor={Colors.primary}
-              />
-            ))}
-          </View>
+          {/* OTP boxes — visual only, backed by a single hidden input */}
+          <Pressable onPress={() => hiddenInput.current?.focus()}>
+            <View style={styles.otpRow} pointerEvents="none">
+              {Array.from({ length: OTP_LENGTH }).map((_, i) => (
+                <View
+                  key={i}
+                  style={[
+                    styles.otpBox,
+                    code[i] ? styles.otpBoxFilled : null,
+                    loading ? styles.otpBoxDisabled : null,
+                  ]}
+                >
+                  <Text style={styles.otpDigit}>{code[i] ?? ''}</Text>
+                </View>
+              ))}
+            </View>
+          </Pressable>
+
+          {/* Hidden input that captures the full OTP, including SMS autofill */}
+          <TextInput
+            ref={hiddenInput}
+            value={code}
+            onChangeText={handleCodeChange}
+            keyboardType="number-pad"
+            maxLength={OTP_LENGTH}
+            autoFocus
+            editable={!loading}
+            textContentType="oneTimeCode"   // iOS SMS autofill
+            autoComplete="sms-otp"          // Android SMS autofill
+            style={styles.hiddenInput}
+            caretHidden
+          />
 
           {/* Verify button */}
           <TouchableOpacity
@@ -183,9 +174,9 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    paddingHorizontal: Spacing.lg,
-    paddingTop: Spacing.xl,
-    gap: Spacing.lg,
+    paddingHorizontal: Spacing.xl,
+    paddingTop: Spacing.xxl,
+    gap: Spacing.xl,
   },
   header: {
     gap: Spacing.xs,
@@ -212,11 +203,10 @@ const styles = StyleSheet.create({
     height: 52,
     borderWidth: 1.5,
     borderColor: Colors.border,
-    borderRadius: BorderRadius.md,
-    fontSize: 22,
-    fontFamily: 'Inter_700Bold',
-    color: Colors.text,
+    borderRadius: BorderRadius.sm,
     backgroundColor: Colors.inputBg,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   otpBoxFilled: {
     borderColor: Colors.primary,
@@ -224,6 +214,17 @@ const styles = StyleSheet.create({
   },
   otpBoxDisabled: {
     opacity: 0.5,
+  },
+  otpDigit: {
+    fontSize: 22,
+    fontFamily: 'Inter_700Bold',
+    color: Colors.text,
+  },
+  hiddenInput: {
+    position: 'absolute',
+    width: 0,
+    height: 0,
+    opacity: 0,
   },
   buttonDisabled: {
     opacity: 0.6,

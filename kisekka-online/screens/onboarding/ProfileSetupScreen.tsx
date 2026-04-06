@@ -275,10 +275,10 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white,
   },
   scroll: {
-    paddingHorizontal: Spacing.lg,
-    paddingTop: Spacing.xl,
-    paddingBottom: Spacing.xxl,
-    gap: Spacing.lg,
+    paddingHorizontal: Spacing.xl,
+    paddingTop: Spacing.xxl,
+    paddingBottom: Spacing.xxxl,
+    gap: Spacing.xl,
   },
   header: {
     gap: Spacing.xs,
@@ -326,7 +326,7 @@ const styles = StyleSheet.create({
     color: Colors.primary,
   },
   form: {
-    gap: Spacing.lg,
+    gap: Spacing.xl,
   },
   multiline: {
     height: 72,

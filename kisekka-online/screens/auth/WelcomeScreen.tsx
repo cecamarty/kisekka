@@ -50,15 +50,16 @@ export default function WelcomeScreen({ navigation }: Props) {
           <View style={styles.orLine} />
         </View>
 
+        {/* Google Sign-In requires native OAuth client IDs and a custom URI
+            scheme — not compatible with Expo Go. Enabled in a later phase. */}
         <TouchableOpacity
-          style={outlineButton}
-          activeOpacity={0.8}
-          onPress={() => navigation.navigate('GoogleAuth')}
+          style={[outlineButton, styles.googleDisabled]}
+          activeOpacity={1}
+          disabled
         >
           <View style={styles.googleButtonInner}>
-            {/* Google G — inline SVG-style using text */}
-            <Text style={styles.googleG}>G</Text>
-            <Text style={[Typography.button, styles.outlineButtonText]}>
+            <Text style={[styles.googleG, styles.googleGDisabled]}>G</Text>
+            <Text style={[Typography.button, styles.outlineButtonText, styles.googleTextDisabled]}>
               Continue with Google
             </Text>
           </View>
@@ -79,15 +80,15 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.white,
-    paddingHorizontal: Spacing.lg,
+    paddingHorizontal: Spacing.xl,
     justifyContent: 'space-between',
-    paddingBottom: Spacing.xl,
+    paddingBottom: Spacing.xxl,
   },
   brandArea: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    gap: Spacing.md,
+    gap: Spacing.base,
   },
   logoPlaceholder: {
     width: 80,
@@ -115,8 +116,9 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
   actions: {
-    gap: Spacing.md,
-    marginBottom: Spacing.lg,
+    gap: Spacing.base,
+    marginBottom: Spacing.xl,
+    paddingHorizontal: Spacing.base,
   },
   primaryButtonText: {
     color: Colors.white,
@@ -149,6 +151,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'Inter_700Bold',
     color: '#4285F4',
+  },
+  googleDisabled: {
+    opacity: 0.4,
+  },
+  googleGDisabled: {
+    color: Colors.textSecondary,
+  },
+  googleTextDisabled: {
+    color: Colors.textSecondary,
   },
   footer: {
     ...Typography.caption,
