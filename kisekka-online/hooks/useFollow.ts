@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from './useAuth';
 import { followUser, unfollowUser, isFollowing } from '../services/follows';
 
+
 interface UseFollowResult {
   following: boolean;
   loading: boolean;
@@ -9,7 +10,7 @@ interface UseFollowResult {
 }
 
 export function useFollow(targetUserId: string): UseFollowResult {
-  const { user } = useAuth();
+  const { user, userProfile } = useAuth();
   const [following, setFollowing] = useState(false);
   const [loading, setLoading]     = useState(true);
 
@@ -30,7 +31,7 @@ export function useFollow(targetUserId: string): UseFollowResult {
     setFollowing(next);
     try {
       if (next) {
-        await followUser(user.uid, targetUserId);
+        await followUser(user.uid, targetUserId, userProfile?.shopName ?? '');
       } else {
         await unfollowUser(user.uid, targetUserId);
       }

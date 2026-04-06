@@ -117,12 +117,20 @@ export default function ProfileScreen({ navigation, route }: Props) {
 
       {/* Action button */}
       {isOwn ? (
-        <TouchableOpacity
-          style={styles.editBtn}
-          onPress={() => navigation.navigate('EditProfile')}
-        >
-          <Text style={styles.editBtnText}>Edit Profile</Text>
-        </TouchableOpacity>
+        <View style={styles.ownActions}>
+          <TouchableOpacity
+            style={[styles.editBtn, { flex: 1 }]}
+            onPress={() => navigation.navigate('EditProfile')}
+          >
+            <Text style={styles.editBtnText}>Edit Profile</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.editBtn, styles.savedBtn]}
+            onPress={() => navigation.navigate('SavedPosts')}
+          >
+            <Text style={styles.editBtnText}>🔖 Saved</Text>
+          </TouchableOpacity>
+        </View>
       ) : (
         <TouchableOpacity
           style={[styles.editBtn, following && styles.followingBtn]}
@@ -221,13 +229,20 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.inputBg,
   },
   chipLabel: { ...Typography.micro, color: Colors.textSecondary, fontFamily: 'Inter_600SemiBold' },
-  editBtn: {
+  ownActions: {
+    flexDirection: 'row',
+    gap: Spacing.sm,
     marginTop: Spacing.sm,
+  },
+  editBtn: {
     borderWidth: 1,
     borderColor: Colors.border,
     borderRadius: BorderRadius.sm,
     paddingVertical: 8,
     alignItems: 'center',
+  },
+  savedBtn: {
+    paddingHorizontal: Spacing.base,
   },
   editBtnText: { ...Typography.button, color: Colors.text, fontSize: 13 },
   followingBtn:     { backgroundColor: Colors.primary, borderColor: Colors.primary },

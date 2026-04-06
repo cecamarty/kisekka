@@ -1,0 +1,1 @@
+export const ANNOUNCEMENT_FEE_UGX = 5000;

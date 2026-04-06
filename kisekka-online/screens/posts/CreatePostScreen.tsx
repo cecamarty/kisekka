@@ -18,9 +18,12 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AppStackParamList } from '../../app/navigation';
 import { useAuth } from '../../hooks/useAuth';
 import { createPost, generatePostId } from '../../services/posts';
+import { fetchFollowerTokens } from '../../services/follows';
+import { sendNewPostNotifications } from '../../services/notifications';
 import { uploadToR2 } from '../../services/r2';
 import { PostType } from '../../types/post';
 import { CATEGORIES } from '../../constants/categories';
+import { NOTIFICATION_FOLLOWER_CAP } from '../../constants/limits';
 import { Colors, Typography, Spacing, BorderRadius, inputStyle } from '../../constants/theme';
 
 type Props = {
@@ -103,24 +106,40 @@ export default function CreatePostScreen({ navigation }: Props) {
         );
       }
 
+      // Announcements start in pending_payment — they go live after payment confirmation.
+      // All other post types are active immediately.
+      const status = postType === 'announcement' ? 'pending_payment' : 'active';
+
       await createPost(
         {
-          authorId:             user.uid,
-          authorName:           userProfile.displayName,
-          authorShopName:       userProfile.shopName,
+          authorId:              user.uid,
+          authorName:            userProfile.displayName,
+          authorShopName:        userProfile.shopName,
           authorProfilePhotoUrl: userProfile.profilePhotoUrl,
-          type:                 postType,
-          description:          description.trim(),
+          type:                  postType,
+          description:           description.trim(),
           mediaUrls,
-          categories:           selectedCategories,
-          marketLocation:       userProfile.marketLocation,
+          categories:            selectedCategories,
+          marketLocation:        userProfile.marketLocation,
           expiresAt,
-          status:               'active',
+          status,
         },
         postId
       );
 
-      navigation.goBack();
+      if (postType === 'announcement') {
+        // Navigate to payment screen — post is already written with pending_payment status
+        navigation.replace('AnnouncementPayment', {
+          postId,
+          description: description.trim(),
+        });
+      } else {
+        // Notify followers (fire-and-forget)
+        fetchFollowerTokens(user.uid, NOTIFICATION_FOLLOWER_CAP)
+          .then((tokens) => sendNewPostNotifications(tokens, userProfile.shopName, description.trim(), postId))
+          .catch(() => {});
+        navigation.goBack();
+      }
     } catch (err) {
       Alert.alert('Error', 'Failed to create post. Please try again.');
       console.warn('[CreatePost] Submit failed:', err);

@@ -14,7 +14,9 @@
  *     Create     → intercepted by tabPress → opens CreatePost modal
  *     Profile    → ProfileScreen (own)
  *   + modal / push screens layered above the tabs:
- *     CreatePost, PostDetail, UserProfile, EditProfile
+ *     CreatePost, PostDetail, UserProfile, EditProfile,
+ *     AnnouncementPayment, PaymentPending,
+ *     SavedPosts, EditPost
  */
 
 import React from 'react';
@@ -28,21 +30,25 @@ import { useAuth } from '../hooks/useAuth';
 import { Colors } from '../constants/theme';
 
 // Auth screens
-import WelcomeScreen        from '../screens/auth/WelcomeScreen';
-import PhoneEntryScreen     from '../screens/auth/PhoneEntryScreen';
+import WelcomeScreen         from '../screens/auth/WelcomeScreen';
+import PhoneEntryScreen      from '../screens/auth/PhoneEntryScreen';
 import OTPVerificationScreen from '../screens/auth/OTPVerificationScreen';
-import GoogleAuthHandler    from '../screens/auth/GoogleAuthHandler';
+import GoogleAuthHandler     from '../screens/auth/GoogleAuthHandler';
 
 // Onboarding
-import ProfileSetupScreen   from '../screens/onboarding/ProfileSetupScreen';
+import ProfileSetupScreen    from '../screens/onboarding/ProfileSetupScreen';
 
 // App screens
-import HomeScreen           from '../screens/app/HomeScreen';
-import DiscoverScreen       from '../screens/app/DiscoverScreen';
-import CreatePostScreen     from '../screens/posts/CreatePostScreen';
-import PostDetailScreen     from '../screens/posts/PostDetailScreen';
-import ProfileScreen        from '../screens/profile/ProfileScreen';
-import EditProfileScreen    from '../screens/profile/EditProfileScreen';
+import HomeScreen            from '../screens/app/HomeScreen';
+import DiscoverScreen        from '../screens/discover/DiscoverScreen';
+import CreatePostScreen      from '../screens/posts/CreatePostScreen';
+import PostDetailScreen      from '../screens/posts/PostDetailScreen';
+import EditPostScreen        from '../screens/posts/EditPostScreen';
+import ProfileScreen         from '../screens/profile/ProfileScreen';
+import EditProfileScreen     from '../screens/profile/EditProfileScreen';
+import SavedPostsScreen      from '../screens/profile/SavedPostsScreen';
+import AnnouncementPaymentScreen from '../screens/payments/AnnouncementPaymentScreen';
+import PaymentPendingScreen  from '../screens/payments/PaymentPendingScreen';
 
 // ── Param list types ──────────────────────────────────────────────────────────
 
@@ -65,27 +71,31 @@ export type BottomTabParamList = {
 };
 
 export type AppStackParamList = {
-  BottomTabs:  undefined;
-  CreatePost:  undefined;
-  PostDetail:  { postId: string };
-  UserProfile: { userId: string };
-  EditProfile: undefined;
+  BottomTabs:          undefined;
+  CreatePost:          undefined;
+  PostDetail:          { postId: string };
+  UserProfile:         { userId: string };
+  EditProfile:         undefined;
+  EditPost:            { postId: string };
+  SavedPosts:          undefined;
+  AnnouncementPayment: { postId: string; description: string };
+  PaymentPending:      { paymentId: string; postId: string };
 };
 
 // ── Navigators ────────────────────────────────────────────────────────────────
 
-const AuthStack      = createNativeStackNavigator<AuthStackParamList>();
+const AuthStack       = createNativeStackNavigator<AuthStackParamList>();
 const OnboardingStack = createNativeStackNavigator<OnboardingStackParamList>();
-const AppStack       = createNativeStackNavigator<AppStackParamList>();
-const BottomTab      = createBottomTabNavigator<BottomTabParamList>();
+const AppStack        = createNativeStackNavigator<AppStackParamList>();
+const BottomTab       = createBottomTabNavigator<BottomTabParamList>();
 
 function AuthNavigator() {
   return (
     <AuthStack.Navigator screenOptions={{ headerShown: false }}>
-      <AuthStack.Screen name="Welcome"          component={WelcomeScreen} />
-      <AuthStack.Screen name="PhoneEntry"       component={PhoneEntryScreen} />
-      <AuthStack.Screen name="OTPVerification"  component={OTPVerificationScreen} />
-      <AuthStack.Screen name="GoogleAuth"       component={GoogleAuthHandler} />
+      <AuthStack.Screen name="Welcome"         component={WelcomeScreen} />
+      <AuthStack.Screen name="PhoneEntry"      component={PhoneEntryScreen} />
+      <AuthStack.Screen name="OTPVerification" component={OTPVerificationScreen} />
+      <AuthStack.Screen name="GoogleAuth"      component={GoogleAuthHandler} />
     </AuthStack.Navigator>
   );
 }
@@ -153,7 +163,6 @@ function BottomTabNavigator() {
       />
       <BottomTab.Screen
         name="Create"
-        // Dummy component — the tab button intercepts press before it renders
         component={View}
         options={{
           tabBarLabel: '',
@@ -191,6 +200,14 @@ function AppNavigator() {
       <AppStack.Screen name="PostDetail"  component={PostDetailScreen} />
       <AppStack.Screen name="UserProfile" component={ProfileScreen} />
       <AppStack.Screen name="EditProfile" component={EditProfileScreen} />
+      <AppStack.Screen name="EditPost"    component={EditPostScreen} />
+      <AppStack.Screen name="SavedPosts"  component={SavedPostsScreen} />
+      <AppStack.Screen
+        name="AnnouncementPayment"
+        component={AnnouncementPaymentScreen}
+        options={{ presentation: 'modal' }}
+      />
+      <AppStack.Screen name="PaymentPending" component={PaymentPendingScreen} />
     </AppStack.Navigator>
   );
 }

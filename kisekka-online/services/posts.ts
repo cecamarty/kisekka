@@ -64,8 +64,20 @@ export async function fetchUserPosts(userId: string): Promise<Post[]> {
   return snap.docs.map((d) => ({ id: d.id, ...d.data() } as Post));
 }
 
+/** Soft delete — sets status to 'deleted', filters from all queries automatically. */
 export async function deletePost(postId: string): Promise<void> {
-  await updateDoc(doc(db, 'posts', postId), { status: 'expired' });
+  await updateDoc(doc(db, 'posts', postId), { status: 'deleted' });
+}
+
+/** Edit post — description and categories only; post type and media are immutable. */
+export async function editPost(
+  postId: string,
+  updates: { description: string; categories: string[] }
+): Promise<void> {
+  await updateDoc(doc(db, 'posts', postId), {
+    description: updates.description,
+    categories: updates.categories,
+  });
 }
 
 // ── WhatsApp tap tracking ─────────────────────────────────────────────────────
@@ -101,6 +113,42 @@ export async function unsavePost(userId: string, postId: string): Promise<void> 
 export async function fetchSavedPostIds(userId: string): Promise<string[]> {
   const snap = await getDocs(collection(db, 'saved', userId, 'posts'));
   return snap.docs.map((d) => d.id);
+}
+
+/**
+ * Fetch full Post objects for a user's saved posts.
+ * Posts that have been deleted return null from fetchPost — callers should
+ * handle the null to show a "no longer available" placeholder.
+ */
+export async function fetchSavedPosts(userId: string): Promise<(Post | null)[]> {
+  const ids = await fetchSavedPostIds(userId);
+  return Promise.all(ids.map((id) => fetchPost(id)));
+}
+
+// ── Reporting ─────────────────────────────────────────────────────────────────
+
+const REPORT_REASONS = [
+  'Spam',
+  'Misleading or false information',
+  'Offensive content',
+  'Counterfeit parts',
+  'Other',
+] as const;
+
+export type ReportReason = (typeof REPORT_REASONS)[number];
+export { REPORT_REASONS };
+
+export async function reportPost(
+  postId: string,
+  reporterId: string,
+  reason: ReportReason
+): Promise<void> {
+  await addDoc(collection(db, 'reports'), {
+    postId,
+    reporterId,
+    reason,
+    createdAt: serverTimestamp(),
+  });
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
