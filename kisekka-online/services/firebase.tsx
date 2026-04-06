@@ -15,7 +15,16 @@
  */
 
 import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
-import { initializeAuth, getAuth, getReactNativePersistence, Auth } from 'firebase/auth';
+import { initializeAuth, getAuth, Auth } from 'firebase/auth';
+// getReactNativePersistence is in the RN build of @firebase/auth but not typed in the
+// main firebase/auth d.ts. Require it directly to bypass the type gap.
+import type { Persistence } from 'firebase/auth';
+// getReactNativePersistence is in the RN build of @firebase/auth but not typed in the
+// main firebase/auth d.ts. Require it directly to bypass the type gap.
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const { getReactNativePersistence } = require('@firebase/auth') as {
+  getReactNativePersistence: (storage: unknown) => Persistence;
+};
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getFirestore, Firestore } from 'firebase/firestore';
 

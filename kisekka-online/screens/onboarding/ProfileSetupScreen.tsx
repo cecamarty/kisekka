@@ -17,6 +17,7 @@ import {
 import * as ImagePicker from 'expo-image-picker';
 import { useAuth } from '../../hooks/useAuth';
 import { createUserProfile } from '../../services/auth';
+import { CATEGORIES } from '../../constants/categories';
 import {
   Colors,
   Typography,
@@ -25,21 +26,6 @@ import {
   inputStyle,
   primaryButton,
 } from '../../constants/theme';
-
-const CATEGORIES = [
-  'Japanese Cars',
-  'European Cars',
-  'American Cars',
-  'Trucks & Commercial',
-  'Motorcycles',
-  'Electronics & Electrical',
-  'Tyres & Rims',
-  'Body Parts',
-  'Engine & Transmission',
-  'Tools & Equipment',
-  'General Hardware',
-  'Other',
-];
 
 export default function ProfileSetupScreen() {
   const { user, refreshProfile } = useAuth();
@@ -151,7 +137,7 @@ export default function ProfileSetupScreen() {
               <TextInput
                 style={inputStyle}
                 placeholder="e.g. Mukasa John"
-                placeholderTextColor={Colors.textMuted}
+                placeholderTextColor={Colors.textPlaceholder}
                 value={displayName}
                 onChangeText={setDisplayName}
                 autoCapitalize="words"
@@ -162,7 +148,7 @@ export default function ProfileSetupScreen() {
               <TextInput
                 style={inputStyle}
                 placeholder="e.g. Mukasa Auto Spares"
-                placeholderTextColor={Colors.textMuted}
+                placeholderTextColor={Colors.textPlaceholder}
                 value={shopName}
                 onChangeText={setShopName}
                 autoCapitalize="words"
@@ -173,7 +159,7 @@ export default function ProfileSetupScreen() {
               <TextInput
                 style={inputStyle}
                 placeholder="+256 700 000 000"
-                placeholderTextColor={Colors.textMuted}
+                placeholderTextColor={Colors.textPlaceholder}
                 value={whatsappNumber}
                 onChangeText={setWhatsappNumber}
                 keyboardType="phone-pad"
@@ -184,7 +170,7 @@ export default function ProfileSetupScreen() {
               <TextInput
                 style={[inputStyle, styles.multiline]}
                 placeholder="e.g. Row 3, near the main gate, Kisekka"
-                placeholderTextColor={Colors.textMuted}
+                placeholderTextColor={Colors.textPlaceholder}
                 value={marketLocation}
                 onChangeText={setMarketLocation}
                 multiline
@@ -264,7 +250,7 @@ function Field({
 const fieldStyles = StyleSheet.create({
   container: { gap: Spacing.xs },
   labelRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' },
-  label: { ...Typography.label },
+  label: { ...Typography.captionBold },
   required: { color: Colors.error },
   hint: { ...Typography.caption },
 });

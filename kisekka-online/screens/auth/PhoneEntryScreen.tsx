@@ -110,7 +110,7 @@ export default function PhoneEntryScreen({ navigation }: Props) {
             <TextInput
               style={[inputStyle, styles.phoneInput]}
               placeholder="700 000 000"
-              placeholderTextColor={Colors.textMuted}
+              placeholderTextColor={Colors.textPlaceholder}
               keyboardType="phone-pad"
               value={phoneNumber}
               onChangeText={setPhoneNumber}

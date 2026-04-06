@@ -16,6 +16,7 @@ import {
   doc,
   getDoc,
   setDoc,
+  updateDoc,
   serverTimestamp,
 } from 'firebase/firestore';
 import { auth, db } from './firebase';
@@ -71,10 +72,11 @@ export interface UserProfile {
   marketLocation: string;
   whatsappNumber: string;
   profilePhotoUrl: string | null;
+  bio?: string;
   categories: string[];
   followersCount: number;
   followingCount: number;
-  createdAt: unknown; // Firestore Timestamp
+  createdAt: unknown; // Firestore Timestamp — use Timestamp from firebase/firestore if you need arithmetic
   isVerified: boolean;
 }
 
@@ -95,4 +97,11 @@ export async function createUserProfile(
     createdAt: serverTimestamp(),
     isVerified: false,
   });
+}
+
+export async function updateUserProfile(
+  uid: string,
+  data: Partial<Omit<UserProfile, 'uid' | 'createdAt' | 'isVerified'>>
+): Promise<void> {
+  await updateDoc(doc(db, 'users', uid), data as Record<string, unknown>);
 }

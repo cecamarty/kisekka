@@ -50,6 +50,8 @@ export const Colors = {
   error:          '#ED4956',   // errors, destructive actions
   success:        '#78C257',
   verified:       '#0095F6',
+  amber:          '#F59E0B',   // looking_for post type badge
+  purple:         '#7C3AED',   // announcement post type badge
 
   // Aliases kept for backward compatibility
   black:          '#000000',

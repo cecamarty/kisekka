@@ -94,6 +94,25 @@ EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID  # deferred
 EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID      # deferred
 ```
 
+## Phase 2 — Feed, Posts & Media (complete)
+
+New in Phase 2:
+- `types/post.ts` — `Post`, `PostType`, `PostStatus`, `SavedPost`
+- `constants/categories.ts` — single source of truth for CATEGORIES array
+- `services/posts.ts` — Firestore CRUD, `incrementWhatsappTap` (fire-and-forget), save/unsave
+- `services/r2.ts` — R2 upload via `expo-file-system/legacy` + `crypto-js` AWS Sig V4
+- `services/follows.ts` — follow/unfollow with `writeBatch` for atomic counter updates
+- `hooks/useFeed.ts` — fetch + score (recency × 1, category × 2, follow × 3, engagement × 1.5) + `filterPosts`
+- `hooks/useFollow.ts` — optimistic follow state for a target user
+- `components/ui/` — `Avatar`, `SkeletonBox`, `PostTypeBadge`
+- `components/feed/` — `FilterBar`, `PostCard`, `PostCardSkeleton`
+- New screens: `HomeScreen` (real feed), `DiscoverScreen`, `CreatePostScreen`, `PostDetailScreen`, `ProfileScreen`, `EditProfileScreen`
+- Navigation: bottom tabs (Home / Discover / ➕ Create / Profile), `CreatePost` as modal, `PostDetail` / `UserProfile` / `EditProfile` as push screens
+
+**WhatsApp tap tracking rule:** always call `incrementWhatsappTap(post.id)` (sync, fire-and-forget) THEN `Linking.openURL(...)`. Never reverse the order. Never await the increment.
+
+**R2 upload:** uses `expo-file-system/legacy`'s `createUploadTask` + `FileSystemUploadType.BINARY_CONTENT` with AWS Sig V4 headers computed by `crypto-js`. `UNSIGNED-PAYLOAD` avoids hashing the file body on device.
+
 ## Deferred Features
 
 See `DEFERRED.md` for features intentionally skipped. Update it whenever something is shelved.
